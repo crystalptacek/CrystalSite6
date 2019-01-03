@@ -1,14 +1,12 @@
-# set the working directory
-setwd("P:/Quarter-44AB469/R code/Nails")
-
-# Nail Code.R
-#Get nail data for Site 6
-
-# Establish a DBI connection to DAACS PostgreSQL database and submit SQL queries
+# Nail Code
+# Get Site 6 nail data. Plot proportions by area. 
 # Created by:  BCS  8/28/15
 # Last update: BCS  8/31/2015
 # Updated for Site 6: CLP 9.30.16
+# Updated for SHA paper: LB 12.11.18
 
+# set the working directory
+setwd("P:/Quarter-44AB469/R code/Nails")
 
 #load the library
 library(DBI)
@@ -26,35 +24,35 @@ DRCcon<-dbConnect(pgSQL, host='drc.iath.virginia.edu', port='5432',
 
 #Get Nail Data
 NailDataX<-dbGetQuery(DRCcon,'
-                     SELECT
-                     "public"."tblGenArtifact"."Quantity",
-                     "public"."tblGenArtifactForm"."GenArtifactForm",
-                     "public"."tblGenArtifactCompleteness"."GenArtifactCompleteness",
-                     "public"."tblGenArtifactManuTech"."GenArtifactManuTech",
-                     "public"."tblContextFeatureType"."FeatureType",
-                     "public"."tblContext"."ContextID",
-                     "public"."tblContext"."ProjectID",
-                     "public"."tblContext"."Context",
+                      SELECT
+                      "public"."tblGenArtifact"."Quantity",
+                      "public"."tblGenArtifactForm"."GenArtifactForm",
+                      "public"."tblGenArtifactCompleteness"."GenArtifactCompleteness",
+                      "public"."tblGenArtifactManuTech"."GenArtifactManuTech",
+                      "public"."tblContextFeatureType"."FeatureType",
+                      "public"."tblContext"."ContextID",
+                      "public"."tblContext"."ProjectID",
+                      "public"."tblContext"."Context",
                       "public"."tblContext"."QuadratID",
-                     "public"."tblContext"."DAACSStratigraphicGroup",
-                     "public"."tblContext"."FeatureNumber"
-                     FROM
-                     "public"."tblContext"
-                     INNER JOIN "public"."tblContextSample" ON "public"."tblContextSample"."ContextAutoID" = "public"."tblContext"."ContextAutoID"
-                     INNER JOIN "public"."tblGenerateContextArtifactID" ON "public"."tblContextSample"."ContextSampleID" = "public"."tblGenerateContextArtifactID"."ContextSampleID"
-                     INNER JOIN "public"."tblGenArtifact" ON "public"."tblGenArtifact"."GenerateContextArtifactID" = "public"."tblGenerateContextArtifactID"."GenerateContextArtifactID"
-                     INNER JOIN "public"."tblGenArtifactForm" ON "public"."tblGenArtifact"."GenArtifactFormID" = "public"."tblGenArtifactForm"."GenArtifactFormID"
-                     INNER JOIN "public"."tblGenArtifactCompleteness" ON "public"."tblGenArtifact"."GenArtifactCompletenessID" = "public"."tblGenArtifactCompleteness"."GenArtifactCompletenessID"
-                     INNER JOIN "public"."tblGenArtifactMaterial" ON "public"."tblGenArtifactMaterial"."GenerateContextArtifactID" = "public"."tblGenArtifact"."GenerateContextArtifactID"
-                     INNER JOIN "public"."tblGenArtifactManuTech" ON "public"."tblGenArtifactMaterial"."GenArtifactManuTechID" = "public"."tblGenArtifactManuTech"."GenArtifactManuTechID"
-                     LEFT JOIN "public"."tblContextFeatureType" ON "public"."tblContext"."FeatureTypeID" = "public"."tblContextFeatureType"."FeatureTypeID" 
-WHERE ("public"."tblContext"."ProjectID" like \'106\')
-
-AND
-("public"."tblGenArtifactForm"."GenArtifactForm" LIKE \'Nail%\')
-AND
-("public"."tblGenArtifactManuTech"."GenArtifactManuTech" NOT LIKE \'Machine Made\')
-')
+                      "public"."tblContext"."DAACSStratigraphicGroup",
+                      "public"."tblContext"."FeatureNumber"
+                      FROM
+                      "public"."tblContext"
+                      INNER JOIN "public"."tblContextSample" ON "public"."tblContextSample"."ContextAutoID" = "public"."tblContext"."ContextAutoID"
+                      INNER JOIN "public"."tblGenerateContextArtifactID" ON "public"."tblContextSample"."ContextSampleID" = "public"."tblGenerateContextArtifactID"."ContextSampleID"
+                      INNER JOIN "public"."tblGenArtifact" ON "public"."tblGenArtifact"."GenerateContextArtifactID" = "public"."tblGenerateContextArtifactID"."GenerateContextArtifactID"
+                      INNER JOIN "public"."tblGenArtifactForm" ON "public"."tblGenArtifact"."GenArtifactFormID" = "public"."tblGenArtifactForm"."GenArtifactFormID"
+                      INNER JOIN "public"."tblGenArtifactCompleteness" ON "public"."tblGenArtifact"."GenArtifactCompletenessID" = "public"."tblGenArtifactCompleteness"."GenArtifactCompletenessID"
+                      INNER JOIN "public"."tblGenArtifactMaterial" ON "public"."tblGenArtifactMaterial"."GenerateContextArtifactID" = "public"."tblGenArtifact"."GenerateContextArtifactID"
+                      INNER JOIN "public"."tblGenArtifactManuTech" ON "public"."tblGenArtifactMaterial"."GenArtifactManuTechID" = "public"."tblGenArtifactManuTech"."GenArtifactManuTechID"
+                      LEFT JOIN "public"."tblContextFeatureType" ON "public"."tblContext"."FeatureTypeID" = "public"."tblContextFeatureType"."FeatureTypeID" 
+                      WHERE ("public"."tblContext"."ProjectID" like \'106\')
+                      
+                      AND
+                      ("public"."tblGenArtifactForm"."GenArtifactForm" LIKE \'Nail%\')
+                      AND
+                      ("public"."tblGenArtifactManuTech"."GenArtifactManuTech" NOT LIKE \'Machine Made\')
+                      ')
 
 # Remove blank quad IDs
 NailData <- subset(NailDataX, ! NailDataX$QuadratID == '')
@@ -201,15 +199,22 @@ NailData5 <- filter(NailData4, ! NailData4$ManuTech == 'Natural')
 # Create proportion column for category by total for each area
 NailData6 <- mutate(NailData5, prop = Count / CountA)
 
+# Drop Buffer, Southeast, and Southwest from the data
+NailData7 <- filter(NailData6, Area=="North" | Area=="South")
+
+
 # Plot the results
-GenrePlot1 <- ggplot(NailData6, aes(x=NailData6$ManuTech, y=NailData6$prop, fill=NailData6$Area)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  theme_classic() +
+NailPlot1 <- ggplot(NailData7, aes(x=NailData7$ManuTech, y=NailData7$prop, fill=NailData7$Area)) +
+  geom_bar(color="black", stat="identity", position=position_dodge()) +
+#  theme_classic() +
   labs(x="ManuTech", y="Proportion") +
   ggtitle("ManuTech Proportion for Nails") +
-  theme(plot.title=element_text(size=rel(2)),axis.title=element_text(size=rel(2)),
-        axis.text=element_text(size=rel(1.5)), legend.text=element_text(size=rel(1.25)),
+  theme(plot.title=element_text(size=rel(2), hjust=0.5),axis.title=element_text(size=rel(2)),
+        axis.text=element_text(size=rel(1.25)), legend.text=element_text(size=rel(1.25)),
         legend.title=element_text(size=rel(2)))+
-  scale_fill_manual(name="Area", values=c("darkblue","gold", "darkgreen", "red", "purple"))
+  scale_fill_viridis(name="Area", discrete=TRUE)
 
-GenrePlot1
+NailPlot1
+
+#save the plot for website chronology page/presentations
+ggsave("Site 6_NailProportions.png", NailPlot1, width=10, height=7.5, dpi=300)
