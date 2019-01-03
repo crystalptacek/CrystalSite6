@@ -1,6 +1,6 @@
-#Get Site 6 ceramic decoration
+#Get Site 6 ceramic decoration. Plot proportions by area. 
 #LB, 10.4.16
-#LB, 12.18.2018
+#LB, 12.18.2018 update for SHA paper
 
 setwd("P:/Quarter-44AB469/R code/Decoration")
 
@@ -245,15 +245,22 @@ justgenre4 <- filter(justgenre3, ! is.na(Category))
 # Create proportion column for category by total for each area
 justgenre5 <- mutate(justgenre4, prop = Count / totalArea)
 
-# Plot thwe results
-GenrePlot1 <- ggplot(justgenre5, aes(x=justgenre5$Category, y=justgenre5$prop, fill=justgenre5$Area)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  theme_classic() +
+# Drop Buffer, Southeast, and Southwest from the data
+justgenre6 <- filter(justgenre5, Area=="North" | Area=="South")
+
+# Plot the results
+GenrePlot1 <- ggplot(justgenre6, aes(x=justgenre6$Category, y=justgenre6$prop, fill=justgenre6$Area)) +
+  geom_bar(color="black", stat="identity", position=position_dodge()) +
+#  theme_classic() +
   labs(x="Genre", y="Proportion") +
   ggtitle("Genre Proportion for Decorated Ceramics") +
-  theme(plot.title=element_text(size=rel(2)),axis.title=element_text(size=rel(2)),
+  theme(plot.title=element_text(size=rel(2), hjust=0.5),
+        axis.title=element_text(size=rel(2)),
         axis.text=element_text(size=rel(1.5)), legend.text=element_text(size=rel(1.25)),
         legend.title=element_text(size=rel(2)))+
-    scale_fill_manual(name="Phase", values=c("darkblue","gold", "darkgreen", "red", "purple"))
-  
+  scale_fill_viridis(name="Area", discrete=TRUE)
+
 GenrePlot1
+
+#save the plot for website chronology page/presentations
+ggsave("Site 6_GenreProportions.png", GenrePlot1, width=15, height=7.5, dpi=300)
