@@ -14,6 +14,7 @@ require(RPostgreSQL)
 library(RODBC)
 require(tidyr)
 require(dplyr)
+library(viridis)
 
 # tell DBI which driver to use
 pgSQL <- dbDriver("PostgreSQL")
@@ -57,7 +58,7 @@ NailDataX<-dbGetQuery(DRCcon,'
 # Remove blank quad IDs
 NailData <- subset(NailDataX, ! NailDataX$QuadratID == '')
 
-#Create new field for N and S
+#Create new field for areas
 NailData$area <- NailData$QuadratID
 
 #Assign N and S based on quad IDs based on site divisions.
@@ -179,29 +180,27 @@ NailData$area[NailData$area == '091'] <- 'Buffer'
 NailData$area[NailData$area == '107'] <- 'Buffer'
 
 
-#Data Cleaning
+#Data Cleaning. Remove Unprov and everything EXCEPT Cut and Wrought nails
 NailData<- subset(NailData, ! NailData$ContextID   %in% 
                     c('106-UNPROV'))
+NailData2 <- subset(NailData, ! NailData$GenArtifactManuTech %in%
+                      c('Not a Wire Nail', 'Unidentified', 'Drawn/Wire', 'Natural'))
 
 # Area subset
-NailData2<-aggregate(NailData$Quantity, by=list(NailData$area, NailData$GenArtifactManuTech), FUN=sum)
-colnames(NailData2)<- c("Area","ManuTech","Count")
+NailData3<-aggregate(NailData2$Quantity, by=list(NailData2$area, NailData2$GenArtifactManuTech), FUN=sum)
+colnames(NailData3)<- c("Area","ManuTech","Count")
 
-NailData3<-aggregate(NailData2$Count, by=list(NailData2$Area), FUN=sum)
-colnames(NailData3)<- c("Area","CountA")
+NailData4<-aggregate(NailData3$Count, by=list(NailData3$Area), FUN=sum)
+colnames(NailData4)<- c("Area","CountA")
 
 # Merge total counts file with previous data file
-NailData4 <- merge(NailData2, NailData3, by="Area")
-
-# Remove genres with NA category
-NailData5 <- filter(NailData4, ! NailData4$ManuTech == 'Natural')
+NailData5 <- merge(NailData3, NailData4, by="Area")
 
 # Create proportion column for category by total for each area
 NailData6 <- mutate(NailData5, prop = Count / CountA)
 
 # Drop Buffer, Southeast, and Southwest from the data
 NailData7 <- filter(NailData6, Area=="North" | Area=="South")
-
 
 # Plot the results
 NailPlot1 <- ggplot(NailData7, aes(x=NailData7$ManuTech, y=NailData7$prop, fill=NailData7$Area)) +
@@ -210,8 +209,8 @@ NailPlot1 <- ggplot(NailData7, aes(x=NailData7$ManuTech, y=NailData7$prop, fill=
   labs(x="ManuTech", y="Proportion") +
   ggtitle("ManuTech Proportion for Nails") +
   theme(plot.title=element_text(size=rel(2), hjust=0.5),axis.title=element_text(size=rel(2)),
-        axis.text=element_text(size=rel(1.25)), legend.text=element_text(size=rel(1.25)),
-        legend.title=element_text(size=rel(2)))+
+  axis.text=element_text(size=rel(1.25)), legend.text=element_text(size=rel(1.25)),
+  legend.title=element_text(size=rel(2)))+
   scale_fill_viridis(name="Area", discrete=TRUE)
 
 NailPlot1
